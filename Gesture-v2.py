@@ -37,12 +37,14 @@ args = vars(ap.parse_args())
 # define the lower and upper boundaries of the "green"
 # ball in the HSV color space, then initialize the
 # list of tracked points
-#greenLower = (59, 93, 168)
-#greenUpper = (96, 255, 255)
-greenLower = (16, 0, 230)
-greenUpper = (79, 255, 255)
-blueLower = (0, 122, 194)
-blueUpper = (47, 255, 255)
+#color1Lower = (59, 93, 168) #green
+#color1Upper = (96, 255, 255) #green
+color1Lower = (150, 122, 141) #hot pink
+color1Upper = (174, 255, 255) #hot pink
+#color2Lower = (0, 122, 194) #blue
+#color2Upper = (47, 255, 255) #blue
+color2Lower = (67, 85, 129) #light blue
+color2Upper = (139, 255, 255) #light blue
 pts = deque(maxlen=args["buffer"])
  
 # if a video path was not supplied, grab the reference
@@ -64,20 +66,20 @@ while True:
     if args.get("video") and not grabbed:
         break
  
-	# resize the frame, blur it, and convert it to the HSV
+	# resize the frame, blur it, and convert it to the HSV (I think we should change this or make it adaptive)
 	# color space
-    frame = imutils.resize(frame, width=600)
+    #frame = imutils.resize(frame, width=600) 
     # blurred = cv2.GaussianBlur(frame, (11, 11), 0)
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
  
 	# construct a mask for the color "green", then perform
 	# a series of dilations and erosions to remove any small
 	# blobs left in the mask
-    mask1 = cv2.inRange(hsv, greenLower, greenUpper)
+    mask1 = cv2.inRange(hsv, color1Lower, color1Upper)
     mask1 = cv2.erode(mask1, None, iterations=2)
     mask1 = cv2.dilate(mask1, None, iterations=2)
     
-    mask2 = cv2.inRange(hsv, blueLower, blueUpper)
+    mask2 = cv2.inRange(hsv, color2Lower, color2Upper)
     mask2 = cv2.erode(mask2, None, iterations=2)
     mask2 = cv2.dilate(mask2, None, iterations=2)
     	# find contours in the mask and initialize the current
@@ -112,7 +114,9 @@ while True:
         xArr.append(center1[0])
         yArr.append(center1[1])
         
-        point = center1
+        size = 600
+        
+        point = (abs(size-center1[0]),center1[1])
         
         if len(xArr) == 10:
             point = mv_check(xArr, yArr, center1)
